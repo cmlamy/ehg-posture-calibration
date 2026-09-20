@@ -1,3 +1,5 @@
+HEAD
+
 # React + TypeScript + Vite
 
 This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
@@ -29,4 +31,15 @@ If you are developing a production application, we recommend enabling type-aware
 }
 ```
 
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+# See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+
+
+
+# ehg-posture-calibration
+
+Schneider KT, Deckardt R. The implication of upright posture on pregnancy. J Perinat Med. 1991;19(1-2):121-31. doi: 10.1515/jpme.1991.19.1-2.121. PMID: 1870049.
+
+Bossung V, Singer A, Ratz T, Rothenbühler M, Leeners B, Kimmich N. Changes in Heart Rate, Heart Rate Variability, Breathing Rate, and Skin Temperature throughout Pregnancy and the Impact of Emotions-A Longitudinal Evaluation Using a Sensor Bracelet. Sensors (Basel). 2023 Jul 23;23(14):6620. doi: 10.3390/s23146620. PMID: 37514915; PMCID: PMC10385491.
+
+origin/main
+
