@@ -199,9 +199,10 @@ export function LiveExperimentModal({ open, onClose }: LiveExperimentModalProps)
                 <input
                   type="checkbox"
                   checked={enabled[id]}
-                  onChange={(event) =>
-                    setEnabled((current) => ({ ...current, [id]: event.currentTarget.checked }))
-                  }
+                  onChange={(event) => {
+                    const checked = event.currentTarget.checked
+                    setEnabled((current) => ({ ...current, [id]: checked }))
+                  }}
                   className="accent-sage-deep"
                 />
                 {MECHANISMS[id].name}

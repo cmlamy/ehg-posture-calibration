@@ -236,7 +236,7 @@ export function Home() {
                       animate={{ opacity: 1, x: 0 }}
                       className="text-sm text-sage-deep"
                     >
-                      Calibrating Modal
+                      Calibrating Model
                     </motion.span>
                   )}
                 </div>
