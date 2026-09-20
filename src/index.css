@@ -1,0 +1,66 @@
+@import "tailwindcss";
+
+@theme {
+  --font-display: "Fraunces", "Times New Roman", serif;
+  --font-sans: "Source Sans 3", "Segoe UI", system-ui, sans-serif;
+  --color-ivory: #f4efe6;
+  --color-cream: #faf6f0;
+  --color-blush: #ead5d0;
+  --color-blush-deep: #d9b8b2;
+  --color-sage: #7d8b74;
+  --color-sage-deep: #5f6b58;
+  /* Mechanism hues — reserved for the five signal mechanisms */
+  --color-terracotta: #c47865;
+  --color-plum: #8a6d82;
+  --color-mustard: #c4a35a;
+  /* Structural neutrals — everything that is not a mechanism */
+  --color-stone: #8a7f7a;
+  --color-stone-soft: #a09690;
+  --color-charcoal: #3a3532;
+  --color-ink: #2c2826;
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--color-ivory);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+}
+
+input[type="range"].mech-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 10px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--track, #c47865) 28%, #f4efe6);
+  outline: none;
+}
+
+input[type="range"].mech-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  background: var(--thumb, #c47865);
+  border: 3px solid #faf6f0;
+  box-shadow: 0 2px 8px color-mix(in srgb, var(--thumb, #c47865) 40%, transparent);
+  cursor: grab;
+}
+
+input[type="range"].mech-slider::-moz-range-thumb {
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  background: var(--thumb, #c47865);
+  border: 3px solid #faf6f0;
+  box-shadow: 0 2px 8px color-mix(in srgb, var(--thumb, #c47865) 40%, transparent);
+  cursor: grab;
+}
