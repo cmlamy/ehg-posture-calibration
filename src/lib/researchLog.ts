@@ -325,6 +325,39 @@ export function dayKey(iso: string) {
   return iso.slice(0, 10)
 }
 
+export function todayKey() {
+  const now = new Date()
+  const y = now.getFullYear()
+  const m = String(now.getMonth() + 1).padStart(2, '0')
+  const d = String(now.getDate()).padStart(2, '0')
+  return `${y}-${m}-${d}`
+}
+
+const DAY_NOTES_KEY = 'vera-research-day-notes'
+
+export function loadDayNotes(): Record<string, string> {
+  try {
+    const raw = localStorage.getItem(DAY_NOTES_KEY)
+    if (!raw) return {}
+    const parsed: unknown = JSON.parse(raw)
+    if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) return {}
+    const notes: Record<string, string> = {}
+    for (const [key, value] of Object.entries(parsed)) {
+      if (typeof value === 'string') notes[key] = value
+    }
+    return notes
+  } catch {
+    return {}
+  }
+}
+
+export function saveDayNote(key: string, note: string) {
+  const notes = loadDayNotes()
+  if (note.trim() === '') delete notes[key]
+  else notes[key] = note
+  localStorage.setItem(DAY_NOTES_KEY, JSON.stringify(notes))
+}
+
 function csvCell(value: string) {
   return `"${value.replace(/"/g, '""')}"`
 }

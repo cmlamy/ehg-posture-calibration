@@ -8,6 +8,7 @@ const NAV_ITEMS = [
   { to: '/data', label: 'Data' },
   { to: '/pipeline', label: 'Pipeline' },
   { to: '/validation', label: 'Validation' },
+  { to: '/community', label: 'Community' },
   { to: '/log', label: 'Research Log' },
   { to: '/settings', label: 'Settings' },
 ]
@@ -41,6 +42,7 @@ export function Sidebar() {
               transition={{ duration: 0.18 }}
               className="font-display text-sm font-semibold tracking-[0.18em] text-ink"
               style={{ whiteSpace: 'nowrap' }}
+              title="Vertical EHG Response Adaptation"
             >
               VERA
             </motion.span>
