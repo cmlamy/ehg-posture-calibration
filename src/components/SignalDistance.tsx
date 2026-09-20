@@ -9,12 +9,16 @@ type SignalDistanceProps = {
   history: number[]
   /** Narrow stacked card, for sitting beside the posture chart. */
   compact?: boolean
+  label?: string
+  description?: string
 }
 
 export const SignalDistance = memo(function SignalDistance({
   mmd,
   history,
   compact = false,
+  label = 'Signal Distance',
+  description = 'Lower is closer to the target mix.',
 }: SignalDistanceProps) {
   const prev = history.length > 1 ? history[history.length - 2] : mmd
   const delta = mmd - prev
@@ -70,7 +74,7 @@ export const SignalDistance = memo(function SignalDistance({
     return (
       <div className="rounded-3xl bg-cream/80 p-5 ring-1 ring-blush/80">
         <p className="text-xs font-medium tracking-[0.18em] text-sage-deep uppercase">
-          Signal Distance
+          {label}
         </p>
         <p className="mt-3 font-display text-4xl leading-none text-ink tabular-nums">
           <SpringNumber value={mmd} decimals={3} />
@@ -78,7 +82,7 @@ export const SignalDistance = memo(function SignalDistance({
         <div className="mt-2">{trend}</div>
         <div className="mt-4">{spark}</div>
         <p className="mt-3 text-xs leading-relaxed text-charcoal/60">
-          Lower is closer to the target mix.
+          {description}
         </p>
       </div>
     )
@@ -87,7 +91,7 @@ export const SignalDistance = memo(function SignalDistance({
   return (
     <div className="rounded-3xl bg-cream/80 p-6 ring-1 ring-blush/80">
       <p className="text-xs font-medium tracking-[0.18em] text-sage-deep uppercase">
-        Signal Distance
+        {label}
       </p>
       <div className="mt-2 flex items-end gap-4">
         <p className="font-display text-5xl leading-none text-ink tabular-nums">
@@ -123,7 +127,7 @@ export const SignalDistance = memo(function SignalDistance({
         </svg>
       </div>
       <p className="mt-3 text-sm text-charcoal/70">
-        Lower means closer to the target distribution.
+        {description}
       </p>
     </div>
   )

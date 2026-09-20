@@ -1,4 +1,29 @@
 
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.coverage
+htmlcov/
+*.egg-info/
+# Keep generated runs out of Git by default, except for the two result sets
+# used by the frontend and documentation.
+results/*
+!results/nested-cv-quick/
+!results/nested-cv-quick/**
+!results/standing-nested-cv-full/
+!results/standing-nested-cv-full/report.md
+!results/standing-nested-cv-full/standing_demo.npz
+!results/standing-nested-cv-full/standing_demo_envelope.png
+!results/standing-nested-cv-full/standing_effective_config.json
+!results/standing-nested-cv-full/standing_projection.json
+# This detailed Monte Carlo table is reproducible but too large for GitHub.
+results/standing-nested-cv-full/standing_samples.jsonl
+seated-dataset/
+laying-dataset/
+laying-tpehg-dataset/
+data/
+HEAD
 # Logs
 logs
 *.log

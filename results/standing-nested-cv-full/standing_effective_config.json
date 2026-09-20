@@ -1,0 +1,160 @@
+{
+  "calibration_effective_config": {
+    "bandpass_hz": [
+      0.2,
+      3.0
+    ],
+    "bootstrap_iterations": 50,
+    "max_subjects_per_domain": 40,
+    "max_windows_per_subject": 6,
+    "mmd_bandwidth_multipliers": [
+      0.25,
+      0.5,
+      1.0,
+      2.0,
+      4.0
+    ],
+    "optimization": {
+      "max_iterations": 3,
+      "population_size": 4,
+      "restarts": 1,
+      "tolerance": 0.0005
+    },
+    "parameter_ranges": {
+      "breathing": [
+        0.0,
+        1.0
+      ],
+      "electrode_shift": [
+        0.0,
+        1.0
+      ],
+      "fetal_movement": [
+        0.0,
+        1.0
+      ],
+      "heart": [
+        0.0,
+        1.0
+      ],
+      "muscle": [
+        0.0,
+        1.0
+      ]
+    },
+    "physiology": {
+      "breathing_bpm": [
+        16.0,
+        16.0
+      ],
+      "empirical_observations": {
+        "observed_annotation_rates": null,
+        "reason": "No complete, posture-specific annotated training summary has been computed. Missing annotations are unavailable, not zero."
+      },
+      "evidence_status": {
+        "artifact_amplitudes": "engineering assumptions",
+        "breathing_bpm": "published posture-invariance justification",
+        "electrode": "empirical single event; not a distribution",
+        "fetal": "engineering assumption; source does not provide simulator units",
+        "heart_bpm": "published general-pregnancy reference; not a posture change",
+        "muscle": "engineering assumption; source supports direction only"
+      },
+      "fetal_event_duration_seconds": [
+        0.4,
+        2.5
+      ],
+      "fetal_events_per_minute": [
+        0.0,
+        4.0
+      ],
+      "heart_bpm": [
+        84.0,
+        90.0
+      ],
+      "max_artifact_rms_ratio": {
+        "breathing": 0.35,
+        "electrode_noise": 0.4,
+        "fetal_movement": 0.55,
+        "heart": 0.45,
+        "muscle": 0.65
+      },
+      "max_electrode_crosstalk": 0.15,
+      "max_electrode_gain_change": 0.25,
+      "muscle_burst_duration_seconds": [
+        0.5,
+        4.0
+      ],
+      "muscle_bursts_per_minute": [
+        0.0,
+        3.0
+      ],
+      "reference_statistics": {},
+      "respiratory_amplitude_fraction": 0.25,
+      "respiratory_amplitude_mode": "legacy_rms_cap"
+    },
+    "profile_name": "exploratory",
+    "profile_version": 2,
+    "regularization": {
+      "maximum_rms_ratio_change": 1.0,
+      "minimum_waveform_correlation": 0.75,
+      "parameter_l2_weight": 0.01,
+      "preservation_weight": 0.15
+    },
+    "schema_version": 2,
+    "seed": 42,
+    "split_fractions": [
+      0.6,
+      0.2,
+      0.2
+    ],
+    "target_fs": 20.0,
+    "trim_seconds": 180.0,
+    "window_seconds": 60.0
+  },
+  "standing": {
+    "default_draws": 500,
+    "envelope_lowpass_hz": 0.1,
+    "event_detector": {
+      "annotation_association_seconds": 30.0,
+      "decay_time_range_seconds": [
+        0.25,
+        10.0
+      ],
+      "jump_robust_z_threshold": 8.0,
+      "minimum_decay_spearman_magnitude": 0.3,
+      "minimum_jump_amplitude_rms_ratio": 0.2,
+      "pre_event_baseline_seconds": 2.0,
+      "refractory_seconds": 2.0
+    },
+    "fallback_assumptions": {
+      "decay_time_range_seconds": [
+        0.5,
+        5.0
+      ],
+      "jump_amplitude_ratio_range": [
+        0.1,
+        0.5
+      ],
+      "movement_event_rate_per_hour": 12.0,
+      "quiet_event_rate_per_hour": 2.0,
+      "reason": "Engineering fallback used only when training-subset detection yields no usable estimate."
+    },
+    "heart_rate_multiplier_range": [
+      1.0,
+      1.3
+    ],
+    "schema_version": 1,
+    "seed": 20260920,
+    "simulator_version": "standing_projection_v1",
+    "sit_to_stand_transition": {
+      "transition_time_jitter_seconds": 2.0,
+      "transition_time_seconds": 10.0
+    },
+    "walking": {
+      "cadence_steps_per_minute_range": [
+        80.0,
+        120.0
+      ]
+    }
+  }
+}
