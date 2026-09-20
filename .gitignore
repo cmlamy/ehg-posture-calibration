@@ -1,4 +1,4 @@
-HEAD
+
 # Logs
 logs
 *.log
@@ -25,4 +25,4 @@ dist-ssr
 *.sw?
 
 
- origin/main
+
