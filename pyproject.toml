@@ -1,0 +1,31 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ehg-posture-calibration"
+version = "0.1.0"
+description = "Subject-split MMD² calibration from lying to seated EHG"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+  "numpy>=1.26",
+  "scipy>=1.11",
+  "scikit-learn>=1.4",
+  "matplotlib>=3.8",
+  "wfdb>=4.1",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8", "pytest-cov>=5"]
+
+[project.scripts]
+ehg-calibrate = "ehg_calibration.cli:main"
+ehg-project-standing = "ehg_calibration.standing_cli:main"
+
+[tool.setuptools.packages.find]
+include = ["ehg_calibration*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"

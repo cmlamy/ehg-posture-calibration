@@ -1,0 +1,49 @@
+{
+  "schema_version": 1,
+  "profile": "legacy_v1",
+  "seed": 42,
+  "target_fs": 20.0,
+  "bandpass_hz": [0.2, 3.0],
+  "trim_seconds": 180.0,
+  "window_seconds": 60.0,
+  "max_windows_per_subject": 6,
+  "split_fractions": [0.6, 0.2, 0.2],
+  "mmd_bandwidth_multipliers": [0.25, 0.5, 1.0, 2.0, 4.0],
+  "parameter_ranges": {
+    "heart": [0.0, 1.0],
+    "breathing": [0.0, 1.0],
+    "fetal_movement": [0.0, 1.0],
+    "muscle": [0.0, 1.0],
+    "electrode_shift": [0.0, 1.0]
+  },
+  "physiology": {
+    "heart_bpm": [84.0, 90.0],
+    "breathing_bpm": [16.0, 16.0],
+    "fetal_events_per_minute": [0.0, 4.0],
+    "fetal_event_duration_seconds": [0.4, 2.5],
+    "muscle_bursts_per_minute": [0.0, 3.0],
+    "muscle_burst_duration_seconds": [0.5, 4.0],
+    "max_electrode_gain_change": 0.25,
+    "max_electrode_crosstalk": 0.15,
+    "max_artifact_rms_ratio": {
+      "heart": 0.45,
+      "breathing": 0.35,
+      "fetal_movement": 0.55,
+      "muscle": 0.65,
+      "electrode_noise": 0.20
+    }
+  },
+  "regularization": {
+    "parameter_l2_weight": 0.01,
+    "preservation_weight": 0.15,
+    "minimum_waveform_correlation": 0.75,
+    "maximum_rms_ratio_change": 1.0
+  },
+  "optimization": {
+    "restarts": 5,
+    "population_size": 6,
+    "max_iterations": 20,
+    "tolerance": 0.0005
+  },
+  "bootstrap_iterations": 500
+}
