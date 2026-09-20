@@ -145,9 +145,14 @@ export function Home() {
           transition={springSoft}
           className="space-y-4"
         >
-          <h1 className="font-display text-2xl font-medium tracking-tight text-charcoal/80 md:text-[1.75rem]">
-            Validated Sitting. Projected Standing.
-          </h1>
+          <div>
+            <p className="font-display text-sm font-medium tracking-[0.28em] text-ink">
+              VERA
+            </p>
+            <h1 className="mt-1 font-display text-2xl font-medium tracking-tight text-charcoal/80 md:text-[1.75rem]">
+              Vertical EHG Response Adaptation
+            </h1>
+          </div>
 
           <PostureStages posture={posture} onChange={setPosture} />
 
