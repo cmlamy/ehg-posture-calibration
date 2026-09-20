@@ -4,6 +4,7 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
+    "data:refresh": ".venv/bin/python scripts/export_frontend_data.py",
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "oxlint",
