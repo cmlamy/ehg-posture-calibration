@@ -1,3 +1,5 @@
+import { matchGroups, type ResearchGroup } from './community'
+
 export type GuideLink = { label: string; to: string }
 
 export type GuideEntry = {
@@ -138,14 +140,14 @@ export const GUIDE: GuideEntry[] = [
       'who else works on this',
     ],
     answer:
-      'Community is the networking floor. Every listed group shows their institution, focus, and a contact. Email opens your mail client. Message keeps a note inside VERA so you can follow up without leaving the site.',
+      'Community is the directory of research groups on VERA. Ask me for a country, a university, or a topic — wearables, standing, EHG, MMD — and I will name the group, the person, and their email. Email opens your mail client. Message keeps a note on the Community page.',
     links: [{ label: 'Open Community', to: '/community' }],
   },
   {
     id: 'chat',
     questions: ['how does this chat work', 'are you ai', 'who are you'],
     answer:
-      'I am the VERA guide. I answer from the site itself — pages, datasets, mechanisms, and how the posture graph works. I do not search the web. Ask about a page, a colour, or a button, or open Community to find a research group.',
+      'I am the VERA guide. I answer from this site: pages, datasets, mechanisms, and the Community directory of groups and contacts. I do not search the web. Ask who works on a topic or in a country, or ask how a page works.',
     links: [{ label: 'Open Community', to: '/community' }],
   },
 ]
@@ -187,6 +189,10 @@ function tokens(text: string) {
     .filter((w) => w.length > 1 && !STOP.has(w))
 }
 
+function formatGroup(group: ResearchGroup) {
+  return `${group.institution} — ${group.name}\n${group.contact} · ${group.email}\n${group.focus.join(', ')}. ${group.summary}`
+}
+
 export function answerQuestion(raw: string): { answer: string; links: GuideLink[]; entryId: string | null } {
   const asked = tokens(raw)
   if (asked.length === 0) {
@@ -194,7 +200,27 @@ export function answerQuestion(raw: string): { answer: string; links: GuideLink[
       entryId: null,
       links: [{ label: 'Community', to: '/community' }],
       answer:
-        'Ask about VERA, the datasets, the five mechanisms, sitting versus standing, or how to reach another group.',
+        'Ask about VERA, the datasets, sitting versus standing, or who in Community works on a topic.',
+    }
+  }
+
+  const groups = matchGroups(raw)
+  if (groups.length > 0) {
+    const intro =
+      groups.length === 1
+        ? 'Here is the Community group that matches.'
+        : `Here are ${groups.length} Community groups that match.`
+    const links: GuideLink[] = [
+      { label: 'Open Community', to: '/community' },
+      ...groups.map((group) => ({
+        label: `Email ${group.contact.split(' ').slice(-1)[0]}`,
+        to: `mailto:${group.email}?subject=${encodeURIComponent('VERA community — ' + group.name)}`,
+      })),
+    ]
+    return {
+      entryId: 'community-match',
+      links,
+      answer: `${intro}\n\n${groups.map(formatGroup).join('\n\n')}`,
     }
   }
 
@@ -221,7 +247,7 @@ export function answerQuestion(raw: string): { answer: string; links: GuideLink[
         { label: 'Community', to: '/community' },
       ],
       answer:
-        'I am not sure. Try asking what VERA is, how sitting and standing work, what the sliders mean, or how to message a group in Community.',
+        'I am not sure. Try asking what VERA is, who in the UK works on wearables, how sitting and standing work, or how to message a group in Community.',
     }
   }
 
