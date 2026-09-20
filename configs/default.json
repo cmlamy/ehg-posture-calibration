@@ -79,7 +79,7 @@
           "breathing": 0.35,
           "fetal_movement": 0.55,
           "muscle": 0.65,
-          "electrode_noise": 0.40
+          "electrode_noise": 0.20
         },
         "respiratory_amplitude_mode": "legacy_rms_cap",
         "respiratory_amplitude_fraction": 0.25,

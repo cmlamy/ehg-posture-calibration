@@ -1,37 +1,42 @@
 import { motion, useMotionValueEvent, useSpring } from 'framer-motion'
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { BackendSittingChart } from '../components/BackendSittingChart'
+import { BackendStandingChart } from '../components/BackendStandingChart'
 import { ComparisonPanels } from '../components/ComparisonPanels'
 import { CompositionDonut } from '../components/CompositionDonut'
+import { LiveExperimentModal } from '../components/LiveExperimentModal'
 import { MechanismSlider } from '../components/MechanismSlider'
 import { PostureChart } from '../components/PostureChart'
 import { PostureStages } from '../components/PostureStages'
 import { SignalDistance } from '../components/SignalDistance'
-import { SimulationControls } from '../components/SimulationControls'
 import {
   CLINICAL_WEIGHTS,
-  FITTED_WEIGHTS,
   MECHANISM_IDS,
-  TARGET_WEIGHTS,
   type MechanismId,
   type Weights,
 } from '../lib/mechanisms'
-import { springFit, springSoft, springSpread } from '../lib/motion'
+import { BACKEND_RESULTS } from '../lib/backendResults.generated'
+import { springFit, springSoft } from '../lib/motion'
 import {
-  generateOutcomes,
   lerpWeights,
-  STANDING_WEIGHTS,
   type PosturePhase,
 } from '../lib/projection'
 import {
   compositionShares,
-  mmdDistance,
   PHASE_RATE,
   tracesFromWeights,
 } from '../lib/signal'
 
+const CALIBRATED_WEIGHTS: Weights = BACKEND_RESULTS.calibration.fittedParameters
+const RAW_MMD2 = BACKEND_RESULTS.calibration.rawMmd2
+const CALIBRATED_MMD2 = BACKEND_RESULTS.calibration.calibratedMmd2
+const CALIBRATION_MATCH = BACKEND_RESULTS.calibration.relativeMmd2Reduction * 100
+const MMD2_REDUCTION_CI = BACKEND_RESULTS.calibration.mmd2ReductionCi95
+const CALIBRATED_AUC = BACKEND_RESULTS.calibration.calibratedDomainAuc
+
 function mixFor(posture: PosturePhase, fitted: boolean): Weights {
-  if (posture === 'standing') return STANDING_WEIGHTS
-  if (posture === 'sitting') return fitted ? FITTED_WEIGHTS : TARGET_WEIGHTS
+  if (posture === 'standing') return CALIBRATED_WEIGHTS
+  if (posture === 'sitting') return fitted ? CALIBRATED_WEIGHTS : CLINICAL_WEIGHTS
   return CLINICAL_WEIGHTS
 }
 
@@ -40,19 +45,29 @@ export function Home() {
   const [weights, setWeights] = useState<Weights>(CLINICAL_WEIGHTS)
   const [phase, setPhase] = useState(0)
   const [hovered, setHovered] = useState<MechanismId | null>(null)
-  const [history, setHistory] = useState<number[]>(() => [mmdDistance(CLINICAL_WEIGHTS)])
+  const [history, setHistory] = useState<number[]>(() => [RAW_MMD2])
   const lastRecorded = useRef(history[0])
 
   // ── Posture projection state ──────────────────────────────────────────────
   const [posture, setPosture] = useState<PosturePhase>('laying')
-  const [seed, setSeed] = useState(2718)
-  const [running, setRunning] = useState(true)
   const [showBand, setShowBand] = useState(true)
-  const [highlight, setHighlight] = useState<number | null>(null)
   const [fitted, setFitted] = useState(false)
+  const [calibrating, setCalibrating] = useState(false)
+  const [settingsOpen, setSettingsOpen] = useState(false)
   const weightsRef = useRef(weights)
-  weightsRef.current = weights
   const sliderAnim = useRef(0)
+  const calibrationTimer = useRef<number | null>(null)
+
+  useEffect(() => {
+    weightsRef.current = weights
+  }, [weights])
+
+  useEffect(
+    () => () => {
+      if (calibrationTimer.current !== null) window.clearTimeout(calibrationTimer.current)
+    },
+    [],
+  )
 
   useEffect(() => {
     const target = mixFor(posture, fitted)
@@ -83,16 +98,9 @@ export function Home() {
       setPhase((p) => p + dt * PHASE_RATE)
       frame = requestAnimationFrame(tick)
     }
-    if (running) frame = requestAnimationFrame(tick)
+    frame = requestAnimationFrame(tick)
     return () => cancelAnimationFrame(frame)
-  }, [running])
-
-  const outcomes = useMemo(() => generateOutcomes(seed), [seed])
-
-  // Spring that fans the outcomes out of the sitting baseline into the range.
-  const spreadSpring = useSpring(0, springSpread)
-  const [spread, setSpread] = useState(0)
-  useMotionValueEvent(spreadSpring, 'change', setSpread)
+  }, [])
 
   const fitSpring = useSpring(0, springFit)
   const [fit, setFit] = useState(0)
@@ -106,32 +114,47 @@ export function Home() {
     fitSpring.set(fitted ? 1 : 0)
   }, [fitSpring, fitted, posture])
 
-  useEffect(() => {
-    if (posture === 'laying') setFitted(false)
-  }, [posture])
-
-  useEffect(() => {
-    if (posture !== 'standing') {
-      spreadSpring.jump(0)
-      return
-    }
-    spreadSpring.jump(0)
-    spreadSpring.set(1)
-  }, [spreadSpring, seed, posture])
-
   const traces = useMemo(() => tracesFromWeights(weights, phase), [weights, phase])
   const donut = useMemo(() => compositionShares(weights), [weights])
-  const mmd = useMemo(() => mmdDistance(weights), [weights])
+  const displayedMmd2 = fitted || posture === 'standing' ? CALIBRATED_MMD2 : RAW_MMD2
 
   useEffect(() => {
-    if (Math.abs(mmd - lastRecorded.current) < 0.0008) return
-    lastRecorded.current = mmd
-    setHistory((prev) => [...prev.slice(-47), mmd])
-  }, [mmd])
+    if (Math.abs(displayedMmd2 - lastRecorded.current) < 0.0008) return
+    lastRecorded.current = displayedMmd2
+    setHistory((prev) => [...prev.slice(-47), displayedMmd2])
+  }, [displayedMmd2])
 
   const onChange = (id: MechanismId, next: number) => {
     cancelAnimationFrame(sliderAnim.current)
     setWeights((prev) => ({ ...prev, [id]: next }))
+  }
+
+  const onPostureChange = (next: PosturePhase) => {
+    if (next !== 'sitting' && calibrationTimer.current !== null) {
+      window.clearTimeout(calibrationTimer.current)
+      calibrationTimer.current = null
+      setCalibrating(false)
+    }
+    setPosture(next)
+    if (next === 'laying') setFitted(false)
+  }
+
+  const startCalibration = () => {
+    if (calibrating) return
+    setCalibrating(true)
+    calibrationTimer.current = window.setTimeout(() => {
+      setCalibrating(false)
+      setFitted(true)
+      calibrationTimer.current = null
+    }, 5000)
+  }
+
+  const runFit = () => {
+    if (fitted) {
+      setFitted(false)
+      return
+    }
+    startCalibration()
   }
 
   return (
@@ -149,40 +172,116 @@ export function Home() {
             Validated Sitting. Projected Standing.
           </h1>
 
-          <PostureStages posture={posture} onChange={setPosture} />
+          <PostureStages posture={posture} onChange={onPostureChange} />
 
-          <div className="grid items-start gap-4 lg:grid-cols-[minmax(0,1fr)_13.5rem]">
+          <div
+            className={`grid items-start gap-4 ${
+              posture === 'standing' ? '' : 'lg:grid-cols-[minmax(0,1fr)_13.5rem]'
+            }`}
+          >
             <div className="min-w-0 space-y-4">
-              <PostureChart
-                posture={posture}
-                outcomes={outcomes}
-                phase={phase}
-                spread={spread}
-                highlight={highlight}
-                showBand={showBand}
-                onHighlight={setHighlight}
-                weights={weights}
-                fit={fit}
-              />
-
-              {posture !== 'laying' && (
-                <SimulationControls
-                  seed={seed}
-                  onReseed={() => setSeed(Math.floor(Math.random() * 99999))}
-                  running={running}
-                  onToggle={() => setRunning((r) => !r)}
+              {posture === 'standing' ? (
+                <BackendStandingChart
+                  data={BACKEND_RESULTS.standing}
                   showBand={showBand}
-                  onToggleBand={() => setShowBand((b) => !b)}
-                  simulationActive={posture === 'standing'}
-                  showSeed={false}
-                  fitAvailable={posture === 'sitting'}
-                  fitted={fitted}
-                  onFit={() => setFitted((prev) => !prev)}
                 />
+              ) : posture === 'sitting' ? (
+                <BackendSittingChart
+                  data={BACKEND_RESULTS.calibration.sittingDemo}
+                  fit={fit}
+                  mmd2ReductionPercent={CALIBRATION_MATCH}
+                />
+              ) : (
+                <PostureChart
+                  posture={posture}
+                  outcomes={[]}
+                  phase={phase}
+                  spread={0}
+                  highlight={null}
+                  showBand={showBand}
+                  onHighlight={() => undefined}
+                  weights={weights}
+                  fit={fit}
+                />
+              )}
+
+              {posture === 'sitting' && (
+                <div className="flex flex-wrap items-center gap-3">
+                  <button
+                    id="fit-sitting"
+                    type="button"
+                    onClick={runFit}
+                    disabled={calibrating}
+                    className="rounded-full bg-sage-deep px-4 py-2 text-sm font-medium text-cream disabled:cursor-wait disabled:opacity-65"
+                  >
+                    {fitted ? '↺ Reset laying' : 'Fit sitting'}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setSettingsOpen(true)}
+                    className="flex h-9 w-9 items-center justify-center rounded-full bg-cream text-lg text-charcoal/70 ring-1 ring-blush/60 transition-colors hover:bg-blush/30 hover:text-ink"
+                    aria-label="Open live experiment settings"
+                    title="Live experiment settings"
+                  >
+                    ⚙
+                  </button>
+                  {calibrating && (
+                    <motion.span
+                      initial={{ opacity: 0, x: -4 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      className="text-sm text-sage-deep"
+                    >
+                      Calibrating Modal
+                    </motion.span>
+                  )}
+                </div>
+              )}
+              {posture === 'standing' && (
+                <div className="flex flex-wrap items-center gap-3">
+                  <button
+                    id="toggle-backend-standing-band"
+                    onClick={() => setShowBand((visible) => !visible)}
+                    aria-pressed={showBand}
+                    className="rounded-full bg-cream px-4 py-2 text-sm font-medium text-charcoal/70 ring-1 ring-blush/60 transition-colors hover:bg-blush/30 hover:text-ink"
+                  >
+                    {showBand ? '◫ Hide band' : '◫ Show band'}
+                  </button>
+                  <span className="text-xs text-charcoal/40">
+                    {BACKEND_RESULTS.standing.draws} backend simulation draws · projected, not validated
+                  </span>
+                </div>
               )}
             </div>
 
-            <SignalDistance mmd={mmd} history={history} compact />
+            {posture !== 'standing' && (
+              <div className="space-y-3">
+                <SignalDistance
+                  mmd={displayedMmd2}
+                  history={history}
+                  compact
+                  label="Signal Distance (MMD²)"
+                  description="Lower is closer to the measured seated dataset."
+                />
+                {posture === 'sitting' && fitted && (
+                  <div className="space-y-2 rounded-3xl bg-cream/80 p-4 ring-1 ring-blush/80">
+                    <div>
+                      <p className="text-[0.65rem] font-semibold tracking-[0.14em] text-charcoal/45 uppercase">
+                        95% CI · MMD² reduction
+                      </p>
+                      <p className="mt-1 font-mono text-sm text-ink">
+                        {MMD2_REDUCTION_CI[0].toFixed(4)} – {MMD2_REDUCTION_CI[1].toFixed(4)}
+                      </p>
+                    </div>
+                    <div className="border-t border-blush/50 pt-2">
+                      <p className="text-[0.65rem] font-semibold tracking-[0.14em] text-charcoal/45 uppercase">
+                        Calibrated domain AUC
+                      </p>
+                      <p className="mt-1 font-mono text-sm text-ink">{CALIBRATED_AUC.toFixed(3)}</p>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </motion.div>
 
@@ -230,6 +329,10 @@ export function Home() {
         </motion.div>
 
       </div>
+      <LiveExperimentModal
+        open={settingsOpen}
+        onClose={() => setSettingsOpen(false)}
+      />
     </main>
   )
 }
