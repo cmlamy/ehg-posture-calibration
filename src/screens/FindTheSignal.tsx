@@ -12,6 +12,7 @@ import {
   type MechanismId,
   type Weights,
 } from '../lib/mechanisms'
+import { LYING_WINDOW } from '../lib/lyingWindow'
 import { springSoft } from '../lib/motion'
 import {
   compositionDeltas,
@@ -123,6 +124,7 @@ export function FindTheSignal() {
                   value={weights[id]}
                   samples={traces.mechanisms[id]}
                   emphasized={hovered === id}
+                  lyingRms={LYING_WINDOW.rms}
                   onChange={onChange}
                   onHover={setHovered}
                 />
