@@ -9,6 +9,7 @@ import { MechanismSlider } from '../components/MechanismSlider'
 import { PostureChart } from '../components/PostureChart'
 import { PostureStages } from '../components/PostureStages'
 import { SignalDistance } from '../components/SignalDistance'
+import { StandingProtocol } from '../components/StandingProtocol'
 import {
   CLINICAL_WEIGHTS,
   MECHANISM_IDS,
@@ -16,6 +17,7 @@ import {
   type Weights,
 } from '../lib/mechanisms'
 import { BACKEND_RESULTS } from '../lib/backendResults.generated'
+import { LYING_WINDOW, lyingWindowCaption } from '../lib/lyingWindow'
 import { springFit, springSoft } from '../lib/motion'
 import {
   lerpWeights,
@@ -251,6 +253,7 @@ export function Home() {
                   </span>
                 </div>
               )}
+              {posture === 'standing' && <StandingProtocol />}
             </div>
 
             {posture !== 'standing' && (
@@ -286,7 +289,22 @@ export function Home() {
         </motion.div>
 
         {/* ── Sliders + Donut ───────────────────────────────────────────────── */}
-        <div className="grid gap-5 lg:grid-cols-[minmax(0,1.4fr)_minmax(280px,0.8fr)]">
+        <div className="space-y-4">
+          <div>
+            <p className="text-xs font-medium tracking-[0.18em] text-sage-deep uppercase">
+              Add to a lying recording
+            </p>
+            <p className="mt-2 font-mono text-sm text-ink">
+              {lyingWindowCaption()}
+            </p>
+            <p className="mt-1 max-w-2xl text-sm text-charcoal/65">
+              Groups only need lying-down EHG. Each card is what to add to that
+              trace so it approaches the seated Icelandic target. The percent is
+              simulator strength — not heart rate. Assumed maximum is the
+              simulator engineering cap for that factor, not a measured ceiling.
+            </p>
+          </div>
+          <div className="grid gap-5 lg:grid-cols-[minmax(0,1.4fr)_minmax(280px,0.8fr)]">
           <div className="grid gap-4 sm:grid-cols-2">
             {MECHANISM_IDS.map((id, i) => (
               <motion.div
@@ -300,6 +318,7 @@ export function Home() {
                   value={weights[id]}
                   samples={traces.mechanisms[id]}
                   emphasized={hovered === id}
+                  lyingRms={LYING_WINDOW.rms}
                   onChange={onChange}
                   onHover={setHovered}
                 />
@@ -313,6 +332,7 @@ export function Home() {
           >
             <CompositionDonut data={donut} hovered={hovered} onHover={setHovered} />
           </motion.div>
+        </div>
         </div>
 
         {/* ── Comparison panels ─────────────────────────────────────────────── */}

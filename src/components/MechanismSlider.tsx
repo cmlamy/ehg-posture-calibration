@@ -1,6 +1,7 @@
 import type { CSSProperties } from 'react'
 import { motion } from 'framer-motion'
 import { MECHANISMS, type MechanismId } from '../lib/mechanisms'
+import { rangePercent, testProtocol } from '../lib/mechanismRanges'
 import { springSoft } from '../lib/motion'
 import { MechanismIcon } from './MechanismIcon'
 import { SpringNumber } from './SpringNumber'
@@ -11,6 +12,7 @@ type MechanismSliderProps = {
   value: number
   samples: number[]
   emphasized: boolean
+  lyingRms?: number
   onChange: (id: MechanismId, next: number) => void
   onHover: (id: MechanismId | null) => void
 }
@@ -20,11 +22,14 @@ export function MechanismSlider({
   value,
   samples,
   emphasized,
+  lyingRms,
   onChange,
   onHover,
 }: MechanismSliderProps) {
   const meta = MECHANISMS[id]
   const pct = Math.round(value * 100)
+  const range = rangePercent(id)
+  const protocol = testProtocol(id, value, lyingRms)
 
   return (
     <motion.div
@@ -57,10 +62,13 @@ export function MechanismSlider({
           </p>
           <p className="text-sm text-charcoal/70">
             <SpringNumber value={pct} suffix="%" />
-            <span className="ml-2 font-mono text-xs tracking-wide">
-              {meta.dash ? 'pattern' : 'solid'}
-            </span>
+            <span className="ml-1.5 text-xs text-charcoal/45">strength</span>
           </p>
+          <p className="mt-1 text-xs leading-snug text-charcoal/70">
+            {protocol.assumedMax}
+          </p>
+          <p className="mt-1 text-xs leading-snug text-ink">{protocol.test}</p>
+          <p className="text-xs leading-snug text-charcoal/55">{protocol.folds}</p>
         </div>
       </div>
 
@@ -85,13 +93,20 @@ export function MechanismSlider({
         max={100}
         step={1}
         value={pct}
+        aria-valuetext={`${pct} percent strength. ${protocol.assumedMax}. ${protocol.test}. ${protocol.folds}`}
         onInput={(event) => {
           onChange(id, Number(event.currentTarget.value) / 100)
         }}
         onChange={(event) => {
           onChange(id, Number(event.currentTarget.value) / 100)
         }}
-        style={{ '--thumb': meta.color, '--track': meta.color } as CSSProperties}
+        style={
+          {
+            '--thumb': meta.color,
+            '--track': meta.color,
+            background: `linear-gradient(to right, color-mix(in srgb, ${meta.color} 18%, #f4efe6) ${range.low}%, color-mix(in srgb, ${meta.color} 62%, #f4efe6) ${range.low}%, color-mix(in srgb, ${meta.color} 62%, #f4efe6) ${range.high}%, color-mix(in srgb, ${meta.color} 18%, #f4efe6) ${range.high}%)`,
+          } as CSSProperties
+        }
       />
     </motion.div>
   )

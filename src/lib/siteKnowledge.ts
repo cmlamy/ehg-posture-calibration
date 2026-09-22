@@ -50,6 +50,8 @@ Fitted mix: heartbeat ${FITTED_WEIGHTS.heartbeat}, breathing ${FITTED_WEIGHTS.br
 
 BACKEND CALIBRATION (nested CV)
 Raw MMD² 0.082, calibrated MMD² 0.058, about 30% relative reduction. Mean fitted strengths across folds: heartbeat 0.086, breathing 0.311, muscle 0.560, fetal 0.532, electrode 0.953.
+Lying inject window tpehgt_p003 RMS 0.00457 (60 s at 20 Hz). Simulator assumed maxima (engineering caps, not measured ceilings): heartbeat 45%, breathing 35%, muscle 65%, fetal 55%, electrode noise 20% of lying RMS; electrode also gain ±25% and crosstalk 15%. Testable amplitude = strength × cap × lying RMS.
+Standing start-testing ranges (projected, not validated), added on the seated window RMS 0.00449: heartbeat 84–117 bpm at the seated amplitude (3.9% of seated RMS); electrode jumps from 20% of seated RMS, typical 3.3×, 49–58/hour quiet and 92–134/hour movement, decay 0.25–10 s; walking 80–120 steps/min with those electrode jumps timed to steps.
 
 COMMUNITY GROUPS
 ${groups}
